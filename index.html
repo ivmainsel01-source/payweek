@@ -48,7 +48,6 @@
       position: absolute;
       font-family: 'JetBrains Mono', monospace;
       font-weight: 700;
-      font-size: 1.4rem;
       opacity: 0;
       transition: opacity 0.25s;
       user-select: none;
@@ -210,7 +209,7 @@
     #confirm-block {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
       gap: 0;
     }
 
@@ -220,6 +219,7 @@
       letter-spacing: 0.15em;
       text-transform: uppercase;
       margin-bottom: 6px;
+      text-align: center;
     }
 
     #name-input {
@@ -258,6 +258,7 @@
       font-size: 0.62rem;
       color: #555;
       letter-spacing: 0.1em;
+      text-align: center;
     }
     #confirm-note span { color: #ff6b00; }
 
@@ -316,4 +317,192 @@
       <div class="card-value">15h<small>&nbsp;</small></div>
     </div>
     <div class="info-card">
-      <div class="card-
+      <div class="card-label">Dia</div>
+      <div class="card-value">27 Jun<small>Sexta-feira</small></div>
+    </div>
+  </div>
+
+  <div id="confirm-block">
+    <div id="name-label">// confirma presença</div>
+    <input id="name-input" type="text" placeholder="o teu nome" autocomplete="off" spellcheck="false" />
+    <button id="confirm-btn">Confirmar</button>
+    <div id="confirm-note">Confirmação até <span>15 de junho</span></div>
+    <div id="confirm-success">✓ presença confirmada</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const cursor = document.getElementById('cursor');
+  let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top  = my + 'px';
+  });
+
+  const canvas = document.getElementById('lantern-canvas');
+  const ctx    = canvas.getContext('2d');
+  const RADIUS = 130;
+
+  function resizeCanvas() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function drawLantern() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(0,0,0,0.97)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const grad = ctx.createRadialGradient(mx, my, 0, mx, my, RADIUS);
+    grad.addColorStop(0,    'rgba(0,0,0,0)');
+    grad.addColorStop(0.55, 'rgba(0,0,0,0)');
+    grad.addColorStop(1,    'rgba(0,0,0,0.97)');
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(mx, my, RADIUS, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  const layer   = document.getElementById('letters-layer');
+  const TARGET  = 'DESCOBERTA';
+  const DECOYS  = 'ABCDFGHIJKLMNOPQRSTUVXZWYÇ1234567890!?@#';
+  const TOTAL   = 160;
+  const letters = [];
+
+  function randBetween(a, b) { return a + Math.random() * (b - a); }
+
+  function spawnLetters() {
+    const pad = 50;
+    const cx  = window.innerWidth  / 2;
+    const cy  = window.innerHeight / 2;
+
+    const cols = 16;
+    const rows = 10;
+    const cellW = (window.innerWidth  - pad * 2) / cols;
+    const cellH = (window.innerHeight - pad * 2) / rows;
+
+    // frase ocupa largura total — proteger linha inteira; input/botão mais estreito abaixo
+    const phraseTop    = cy - 115;
+    const phraseBottom = cy - 45;
+    const inputTop     = cy - 45;
+    const inputBottom  = cy + 110;
+    const inputLeft    = cx - 130;
+    const inputRight   = cx + 130;
+
+    const cells = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const cx2 = pad + c * cellW + cellW / 2;
+        const cy2 = pad + r * cellH + cellH / 2;
+        const inPhrase = cy2 > phraseTop  && cy2 < phraseBottom;
+        const inInput  = cx2 > inputLeft  && cx2 < inputRight && cy2 >= inputTop && cy2 < inputBottom;
+        if (!inPhrase && !inInput) {
+          cells.push({ cx: cx2, cy: cy2 });
+        }
+      }
+    }
+
+    for (let i = cells.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cells[i], cells[j]] = [cells[j], cells[i]];
+    }
+
+    const count = Math.min(TOTAL, cells.length);
+    for (let i = 0; i < count; i++) {
+      const cell = cells[i];
+      const x = cell.cx + randBetween(-cellW * 0.25, cellW * 0.25);
+      const y = cell.cy + randBetween(-cellH * 0.25, cellH * 0.25);
+
+      const isTarget = i < TARGET.length;
+      const char     = isTarget
+        ? TARGET[i]
+        : DECOYS[Math.floor(Math.random() * DECOYS.length)];
+
+      const el = document.createElement('span');
+      el.classList.add('letter', isTarget ? 'target' : 'decoy');
+      el.textContent = char;
+      el.style.left     = x + 'px';
+      el.style.top      = y + 'px';
+      el.style.fontSize = randBetween(1.4, 3.2) + 'rem';
+      el.style.transform = `rotate(${randBetween(-40, 40)}deg)`;
+      layer.appendChild(el);
+      letters.push({ el, x, y });
+    }
+  }
+  spawnLetters();
+
+  function updateLetterVisibility() {
+    const r2 = RADIUS * RADIUS;
+    letters.forEach(({ el, x, y }) => {
+      const dx = x - mx, dy = y - my;
+      el.style.opacity = (dx * dx + dy * dy < r2) ? '1' : '0';
+    });
+  }
+
+  function loop() {
+    drawLantern();
+    updateLetterVisibility();
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  const input   = document.getElementById('secret-input');
+  const btn     = document.getElementById('submit-btn');
+  const errMsg  = document.getElementById('error-msg');
+  const reveal  = document.getElementById('reveal-screen');
+
+  function attempt() {
+    const val = input.value.trim().toLowerCase();
+    if (val === 'descoberta') {
+      errMsg.textContent = '';
+      reveal.classList.add('active');
+      document.body.style.cursor = 'default';
+      cursor.style.display = 'none';
+    } else {
+      errMsg.textContent = '// acesso negado';
+      input.value = '';
+      input.focus();
+    }
+  }
+
+  btn.addEventListener('click', attempt);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
+
+  const nameInput   = document.getElementById('name-input');
+  const confirmBtn  = document.getElementById('confirm-btn');
+  const confirmSucc = document.getElementById('confirm-success');
+
+  confirmBtn.addEventListener('click', () => {
+    if (nameInput.value.trim().length < 2) {
+      nameInput.focus();
+      return;
+    }
+    confirmSucc.style.display = 'block';
+    confirmBtn.disabled = true;
+    confirmBtn.style.opacity = '0.5';
+    nameInput.disabled = true;
+  });
+
+  nameInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') confirmBtn.click();
+  });
+
+  window.addEventListener('resize', () => {
+    letters.forEach(({ el }) => el.remove());
+    letters.length = 0;
+    spawnLetters();
+  });
+})();
+</script>
+</body>
+</html>
