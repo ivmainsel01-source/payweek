@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DESCOBERTA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #000;
+      overflow: hidden;
+      cursor: none;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    #cursor {
+      position: fixed;
+      width: 12px; height: 12px;
+      background: #ff6b00;
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      box-shadow: 0 0 6px 2px rgba(255,107,0,0.6);
+      transition: transform 0.05s;
+    }
+
+    #lantern-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    #letters-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .letter {
+      position: absolute;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 1.4rem;
+      opacity: 0;
+      transition: opacity 0.25s;
+      user-select: none;
+      pointer-events: none;
+    }
+    .letter.target  { color: #ff6b00; }
+    .letter.decoy   { color: #ffffff; }
+
+    #center-ui {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    #input-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0;
+    }
+
+    #secret-input {
+      width: 160px;
+      background: #000;
+      border: 1.5px solid #ff6b00;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      padding: 6px 8px;
+      outline: none;
+      caret-color: #ff6b00;
+      letter-spacing: 0.05em;
+    }
+    #secret-input::placeholder { color: #555; }
+    #secret-input:focus { box-shadow: 0 0 8px rgba(255,107,0,0.4); }
+
+    #submit-btn {
+      width: 160px;
+      background: #ff6b00;
+      border: none;
+      color: #000;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      padding: 3px 0;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    #submit-btn:hover { background: #ff8c33; box-shadow: 0 0 12px rgba(255,107,0,0.5); }
+
+    #error-msg {
+      margin-top: 6px;
+      color: #ff3333;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      min-height: 1em;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    #reveal-screen {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 20;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+      overflow-y: auto;
+    }
+    #reveal-screen.active { display: flex; }
+
+    #reveal-title {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: clamp(1.6rem, 5vw, 3rem);
+      color: #ff6b00;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      text-shadow: 0 0 20px rgba(255,107,0,0.6);
+    }
+
+    #reveal-subtitle {
+      font-size: 0.7rem;
+      color: #555;
+      letter-spacing: 0.2em;
+      margin-bottom: 36px;
+      text-transform: uppercase;
+    }
+
+    #cards-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .info-card {
+      border: 1px solid #ff6b00;
+      padding: 20px 24px;
+      min-width: 140px;
+      text-align: center;
+      position: relative;
+      background: #000;
+    }
+    .info-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,107,0,0.04);
+      pointer-events: none;
+    }
+
+    .card-label {
+      font-size: 0.6rem;
+      color: #ff6b00;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .card-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.05em;
+    }
+
+    .card-value small {
+      display: block;
+      font-size: 0.65rem;
+      color: #aaa;
+      margin-top: 4px;
+      font-weight: 400;
+    }
+
+    #confirm-block {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0;
+    }
+
+    #name-label {
+      font-size: 0.65rem;
+      color: #ff6b00;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    #name-input {
+      width: 240px;
+      background: #000;
+      border: 1.5px solid #ff6b00;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      padding: 6px 8px;
+      outline: none;
+      caret-color: #ff6b00;
+      letter-spacing: 0.05em;
+    }
+    #name-input::placeholder { color: #444; }
+    #name-input:focus { box-shadow: 0 0 8px rgba(255,107,0,0.4); }
+
+    #confirm-btn {
+      width: 240px;
+      background: #ff6b00;
+      border: none;
+      color: #000;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      padding: 3px 0;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    #confirm-btn:hover { background: #ff8c33; box-shadow: 0 0 12px rgba(255,107,0,0.5); }
+
+    #confirm-note {
+      margin-top: 14px;
+      font-size: 0.62rem;
+      color: #555;
+      letter-spacing: 0.1em;
+    }
+    #confirm-note span { color: #ff6b00; }
+
+    #confirm-success {
+      display: none;
+      margin-top: 10px;
+      font-size: 0.75rem;
+      color: #00cc66;
+      letter-spacing: 0.1em;
+    }
+
+    #reveal-screen::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255,107,0,0.015) 2px,
+        rgba(255,107,0,0.015) 4px
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+    #reveal-screen > * { position: relative; z-index: 1; }
+  </style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<canvas id="lantern-canvas"></canvas>
+<div id="letters-layer"></div>
+
+<div id="center-ui">
+  <div id="input-box">
+    <input id="secret-input" type="text" placeholder="palavra-chave" autocomplete="off" spellcheck="false" />
+    <button id="submit-btn">Entrar</button>
+    <div id="error-msg"></div>
+  </div>
+</div>
+
+<div id="reveal-screen">
+  <div id="reveal-title">DESCOBERTA</div>
+  <div id="reveal-subtitle">// acesso concedido</div>
+
+  <div id="cards-row">
+    <div class="info-card">
+      <div class="card-label">Lugar</div>
+      <div class="card-value">Casa da Ana<small>Rua das Flores, 12</small></div>
+    </div>
+    <div class="info-card">
+      <div class="card-label">Hora</div>
+      <div class="card-value">21:00<small>não chegues tarde</small></div>
+    </div>
+    <div class="info-card">
+      <div class="card-label">Dia</div>
+      <div class="card-value">21 Jun<small>Sábado</small></div>
+    </div>
+  </div>
+
+  <div id="confirm-block">
+    <div id="name-label">// confirma presença</div>
+    <input id="name-input" type="text" placeholder="o teu nome" autocomplete="off" spellcheck="false" />
+    <button id="confirm-btn">Confirmar</button>
+    <div id="confirm-note">Confirmação até <span>15 de junho</span></div>
+    <div id="confirm-success">✓ presença confirmada</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const cursor = document.getElementById('cursor');
+  let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top  = my + 'px';
+  });
+
+  const canvas = document.getElementById('lantern-canvas');
+  const ctx    = canvas.getContext('2d');
+  const RADIUS = 130;
+
+  function resizeCanvas() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function drawLantern() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(0,0,0,0.97)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const grad = ctx.createRadialGradient(mx, my, 0, mx, my, RADIUS);
+    grad.addColorStop(0,    'rgba(0,0,0,0)');
+    grad.addColorStop(0.55, 'rgba(0,0,0,0)');
+    grad.addColorStop(1,    'rgba(0,0,0,0.97)');
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(mx, my, RADIUS, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  const layer   = document.getElementById('letters-layer');
+  const TARGET  = 'DESCOBERTA';
+  const DECOYS  = 'ABCDFGHIJKLMNOPQRSTUVXZWYÇ1234567890!?@#';
+  const TOTAL   = 80;
+  const letters = [];
+
+  function randBetween(a, b) { return a + Math.random() * (b - a); }
+
+  function spawnLetters() {
+    const pad = 60;
+    const cx  = window.innerWidth  / 2;
+    const cy  = window.innerHeight / 2;
+    const cw  = 200, ch = 80;
+
+    for (let i = 0; i < TOTAL; i++) {
+      let x, y, tries = 0;
+      do {
+        x = randBetween(pad, window.innerWidth  - pad);
+        y = randBetween(pad, window.innerHeight - pad);
+        tries++;
+      } while (
+        tries < 30 &&
+        x > cx - cw && x < cx + cw &&
+        y > cy - ch && y < cy + ch
+      );
+
+      const isTarget = i < TARGET.length;
+      const char     = isTarget
+        ? TARGET[i]
+        : DECOYS[Math.floor(Math.random() * DECOYS.length)];
+
+      const el = document.createElement('span');
+      el.classList.add('letter', isTarget ? 'target' : 'decoy');
+      el.textContent = char;
+      el.style.left  = x + 'px';
+      el.style.top   = y + 'px';
+      el.style.fontSize = randBetween(0.9, 1.8) + 'rem';
+      el.style.transform = `rotate(${randBetween(-40, 40)}deg)`;
+      layer.appendChild(el);
+      letters.push({ el, x, y });
+    }
+  }
+  spawnLetters();
+
+  function updateLetterVisibility() {
+    const r2 = RADIUS * RADIUS;
+    letters.forEach(({ el, x, y }) => {
+      const dx = x - mx, dy = y - my;
+      el.style.opacity = (dx * dx + dy * dy < r2) ? '1' : '0';
+    });
+  }
+
+  function loop() {
+    drawLantern();
+    updateLetterVisibility();
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  const input   = document.getElementById('secret-input');
+  const btn     = document.getElementById('submit-btn');
+  const errMsg  = document.getElementById('error-msg');
+  const reveal  = document.getElementById('reveal-screen');
+
+  function attempt() {
+    const val = input.value.trim().toLowerCase();
+    if (val === 'descoberta') {
+      errMsg.textContent = '';
+      reveal.classList.add('active');
+      document.body.style.cursor = 'default';
+      cursor.style.display = 'none';
+    } else {
+      errMsg.textContent = '// acesso negado';
+      input.value = '';
+      input.focus();
+    }
+  }
+
+  btn.addEventListener('click', attempt);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
+
+  const nameInput    = document.getElementById('name-input');
+  const confirmBtn   = document.getElementById('confirm-btn');
+  const confirmSucc  = document.getElementById('confirm-success');
+
+  confirmBtn.addEventListener('click', () => {
+    if (nameInput.value.trim().length < 2) {
+      nameInput.focus();
+      return;
+    }
+    confirmSucc.style.display = 'block';
+    confirmBtn.disabled = true;
+    confirmBtn.style.opacity = '0.5';
+    nameInput.disabled = true;
+  });
+
+  nameInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') confirmBtn.click();
+  });
+
+  window.addEventListener('resize', () => {
+    letters.forEach(({ el }) => el.remove());
+    letters.length = 0;
+    spawnLetters();
+  });
+})();
+</script>
+</body>
+</html>
