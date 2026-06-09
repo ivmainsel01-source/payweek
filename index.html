@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DESCOBERTA</title>
+  <title>PAY WEEK ACTIVITY</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet" />
@@ -56,6 +56,19 @@
     }
     .letter.target  { color: #ff6b00; }
     .letter.decoy   { color: #ffffff; }
+
+    #top-hint {
+      position: fixed;
+      top: 28px;
+      left: 0; right: 0;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: #ff6b00;
+      letter-spacing: 0.1em;
+      z-index: 10;
+      opacity: 0.75;
+    }
 
     #center-ui {
       position: fixed;
@@ -279,6 +292,8 @@
 <canvas id="lantern-canvas"></canvas>
 <div id="letters-layer"></div>
 
+<div id="top-hint">Será que consegues descobrir a primeira pista?</div>
+
 <div id="center-ui">
   <div id="input-box">
     <input id="secret-input" type="text" placeholder="palavra-chave" autocomplete="off" spellcheck="false" />
@@ -288,21 +303,21 @@
 </div>
 
 <div id="reveal-screen">
-  <div id="reveal-title">DESCOBERTA</div>
+  <div id="reveal-title">PAY WEEK ACTIVITY</div>
   <div id="reveal-subtitle">// acesso concedido</div>
 
   <div id="cards-row">
     <div class="info-card">
-      <div class="card-label">Lugar</div>
-      <div class="card-value">Casa da Ana<small>Rua das Flores, 12</small></div>
+      <div class="card-label">Local</div>
+      <div class="card-value">A descobrir<small>&nbsp;</small></div>
     </div>
     <div class="info-card">
       <div class="card-label">Hora</div>
-      <div class="card-value">21:00<small>não chegues tarde</small></div>
+      <div class="card-value">15h<small>&nbsp;</small></div>
     </div>
     <div class="info-card">
       <div class="card-label">Dia</div>
-      <div class="card-value">21 Jun<small>Sábado</small></div>
+      <div class="card-value">27 Jun<small>Sexta-feira</small></div>
     </div>
   </div>
 
@@ -360,7 +375,7 @@
   const layer   = document.getElementById('letters-layer');
   const TARGET  = 'DESCOBERTA';
   const DECOYS  = 'ABCDFGHIJKLMNOPQRSTUVXZWYÇ1234567890!?@#';
-  const TOTAL   = 80;
+  const TOTAL   = 160;
   const letters = [];
 
   function randBetween(a, b) { return a + Math.random() * (b - a); }
@@ -393,7 +408,7 @@
       el.textContent = char;
       el.style.left  = x + 'px';
       el.style.top   = y + 'px';
-      el.style.fontSize = randBetween(0.9, 1.8) + 'rem';
+      el.style.fontSize = randBetween(1.4, 3.2) + 'rem';
       el.style.transform = `rotate(${randBetween(-40, 40)}deg)`;
       layer.appendChild(el);
       letters.push({ el, x, y });
