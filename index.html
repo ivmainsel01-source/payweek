@@ -244,6 +244,26 @@
       font-weight: 400;
     }
 
+    #activity-info {
+      text-align: center;
+      margin-bottom: 20px;
+      max-width: 480px;
+      width: 100%;
+    }
+
+    #activity-info p {
+      font-size: clamp(0.68rem, 2.8vw, 0.78rem);
+      color: #aaa;
+      letter-spacing: 0.04em;
+      line-height: 1.7;
+    }
+
+    #activity-info p:first-child {
+      color: #fff;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
     #confirm-block {
       display: flex;
       flex-direction: column;
@@ -335,12 +355,17 @@
     </div>
     <div class="info-card">
       <div class="card-label">Hora</div>
-      <div class="card-value">18h30<small>&nbsp;</small></div>
+      <div class="card-value">15h<small>&nbsp;</small></div>
     </div>
     <div class="info-card">
       <div class="card-label">Dia</div>
-      <div class="card-value">26 Jun<small>Sexta-feira</small></div>
+      <div class="card-value">27 Jun<small>Sábado</small></div>
     </div>
+  </div>
+
+  <div id="activity-info">
+    <p>19h atividade (valor arredondado: 15€) + 20h30 jantar</p>
+    <p>Podes escolher ambas as opções ou apenas uma das duas</p>
   </div>
 
   <div id="confirm-block">
@@ -364,17 +389,17 @@
   let mx = window.innerWidth / 2, my = window.innerHeight / 2;
   let revealOpen = false;
 
-  /* ── Block all page movement on first screen ── */
   document.addEventListener('touchmove', e => {
     if (!revealOpen) {
       e.preventDefault();
     }
   }, { passive: false });
 
+  document.addEventListener('touchstart', e => {}, { passive: true });
+
   document.addEventListener('gesturestart',  e => e.preventDefault(), { passive: false });
   document.addEventListener('gesturechange', e => e.preventDefault(), { passive: false });
 
-  /* ── Hint positioning ── */
   function positionHint() {
     const cy  = window.innerHeight / 2;
     const vw  = window.innerWidth;
@@ -395,7 +420,6 @@
     document.body.style.cursor = 'default';
   }
 
-  /* ── Lantern canvas ── */
   const canvas = document.getElementById('lantern-canvas');
   const ctx    = canvas.getContext('2d');
   const RADIUS = 130;
@@ -426,7 +450,6 @@
     ctx.restore();
   }
 
-  /* ── Touch lantern ── */
   let touchTimeout = null;
 
   if (isTouch) {
@@ -458,7 +481,6 @@
     }, { passive: true });
   }
 
-  /* ── Letters ── */
   const layer  = document.getElementById('letters-layer');
   const TARGET = 'DESCOBERTA';
   const DECOYS = 'ABCDFGHIJKLMNOPQRSTUVXZWYÇ1234567890!?@#';
