@@ -2,7 +2,7 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>PAY WEEK ACTIVITY</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -10,12 +10,21 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body {
+    html {
+      height: 100%;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+    body {
+      position: fixed;
+      top: 0; left: 0;
       width: 100%; height: 100%;
       background: #000;
       overflow: hidden;
+      overscroll-behavior: none;
       cursor: none;
       font-family: 'JetBrains Mono', monospace;
+      touch-action: none;
     }
 
     #cursor {
@@ -27,7 +36,6 @@
       transform: translate(-50%, -50%);
       z-index: 9999;
       box-shadow: 0 0 6px 2px rgba(255,107,0,0.6);
-      transition: transform 0.05s;
       display: none;
     }
 
@@ -98,6 +106,7 @@
       letter-spacing: 0.05em;
       text-align: center;
       -webkit-appearance: none;
+      touch-action: manipulation;
     }
     #secret-input::placeholder { color: #555; }
     #secret-input:focus { box-shadow: 0 0 8px rgba(255,107,0,0.4); }
@@ -144,6 +153,8 @@
       padding: 32px 16px 48px;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
     }
     #reveal-screen.active { display: flex; }
 
@@ -348,9 +359,22 @@
   const cursor   = document.getElementById('cursor');
   const touchInd = document.getElementById('touch-indicator');
   const topHint  = document.getElementById('top-hint');
+  const reveal   = document.getElementById('reveal-screen');
 
   let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+  let revealOpen = false;
 
+  /* ── Block all page movement on first screen ── */
+  document.addEventListener('touchmove', e => {
+    if (!revealOpen) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  document.addEventListener('gesturestart',  e => e.preventDefault(), { passive: false });
+  document.addEventListener('gesturechange', e => e.preventDefault(), { passive: false });
+
+  /* ── Hint positioning ── */
   function positionHint() {
     const cy  = window.innerHeight / 2;
     const vw  = window.innerWidth;
@@ -371,6 +395,7 @@
     document.body.style.cursor = 'default';
   }
 
+  /* ── Lantern canvas ── */
   const canvas = document.getElementById('lantern-canvas');
   const ctx    = canvas.getContext('2d');
   const RADIUS = 130;
@@ -401,10 +426,12 @@
     ctx.restore();
   }
 
+  /* ── Touch lantern ── */
   let touchTimeout = null;
 
   if (isTouch) {
     document.addEventListener('touchstart', e => {
+      if (revealOpen) return;
       const t = e.touches[0];
       mx = t.clientX; my = t.clientY;
       touchInd.style.left = mx + 'px';
@@ -414,6 +441,7 @@
     }, { passive: true });
 
     document.addEventListener('touchmove', e => {
+      if (revealOpen) return;
       const t = e.touches[0];
       mx = t.clientX; my = t.clientY;
       touchInd.style.left = mx + 'px';
@@ -421,6 +449,7 @@
     }, { passive: true });
 
     document.addEventListener('touchend', () => {
+      if (revealOpen) return;
       touchTimeout = setTimeout(() => {
         touchInd.classList.remove('active');
         mx = window.innerWidth / 2;
@@ -429,6 +458,7 @@
     }, { passive: true });
   }
 
+  /* ── Letters ── */
   const layer  = document.getElementById('letters-layer');
   const TARGET = 'DESCOBERTA';
   const DECOYS = 'ABCDFGHIJKLMNOPQRSTUVXZWYÇ1234567890!?@#';
@@ -450,16 +480,16 @@
     const cellW = (vw - pad * 2) / cols;
     const cellH = (vh - pad * 2) / rows;
 
-    const hintGap   = vw < 480 ? 130 : 100;
-    const phraseTop = cy - hintGap - 36;
-    const phraseBot = cy - hintGap + 36;
+    const hintGap    = vw < 480 ? 130 : 100;
+    const phraseTop  = cy - hintGap - 40;
+    const phraseBot  = cy - hintGap + 40;
 
-    const inputEl   = document.getElementById('secret-input');
-    const inputHalf = inputEl ? (inputEl.offsetWidth / 2 + 28) : 160;
-    const inputTop  = cy - 50;
-    const inputBot  = cy + 130;
-    const inputL    = cx - inputHalf;
-    const inputR    = cx + inputHalf;
+    const inputEl    = document.getElementById('secret-input');
+    const inputHalf  = inputEl ? (inputEl.offsetWidth / 2 + 32) : 170;
+    const inputTop   = cy - 55;
+    const inputBot   = cy + 140;
+    const inputL     = cx - inputHalf;
+    const inputR     = cx + inputHalf;
 
     const cells = [];
     for (let r = 0; r < rows; r++) {
@@ -477,8 +507,8 @@
       [cells[i], cells[j]] = [cells[j], cells[i]];
     }
 
-    const minF = vw < 480 ? 0.9  : 1.4;
-    const maxF = vw < 480 ? 1.85 : 3.2;
+    const minF  = vw < 480 ? 0.9  : 1.4;
+    const maxF  = vw < 480 ? 1.85 : 3.2;
     const count = Math.min(TOTAL, cells.length);
 
     for (let i = 0; i < count; i++) {
@@ -520,12 +550,12 @@
   const input  = document.getElementById('secret-input');
   const btn    = document.getElementById('submit-btn');
   const errMsg = document.getElementById('error-msg');
-  const reveal = document.getElementById('reveal-screen');
 
   function attempt() {
     const val = input.value.trim().toLowerCase();
     if (val === 'descoberta') {
       errMsg.textContent = '';
+      revealOpen = true;
       reveal.classList.add('active');
       reveal.scrollTop = 0;
       if (!isTouch) {
