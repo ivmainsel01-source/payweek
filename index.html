@@ -18,6 +18,7 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
+    /* ── Custom cursor (desktop only) ── */
     #cursor {
       position: fixed;
       width: 12px; height: 12px;
@@ -28,8 +29,10 @@
       z-index: 9999;
       box-shadow: 0 0 6px 2px rgba(255,107,0,0.6);
       transition: transform 0.05s;
+      display: none;
     }
 
+    /* ── Lantern canvas ── */
     #lantern-canvas {
       position: fixed;
       inset: 0;
@@ -37,6 +40,7 @@
       z-index: 1;
     }
 
+    /* ── Letters layer ── */
     #letters-layer {
       position: fixed;
       inset: 0;
@@ -56,19 +60,21 @@
     .letter.target  { color: #ff6b00; }
     .letter.decoy   { color: #ffffff; }
 
+    /* ── Top hint ── */
     #top-hint {
       position: fixed;
-      top: calc(50% - 80px);
       left: 0; right: 0;
       text-align: center;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 1rem;
+      font-size: clamp(0.7rem, 3.5vw, 1rem);
       color: #ff6b00;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.08em;
       z-index: 10;
       opacity: 0.85;
+      padding: 0 16px;
     }
 
+    /* ── Center UI ── */
     #center-ui {
       position: fixed;
       inset: 0;
@@ -86,46 +92,50 @@
     }
 
     #secret-input {
-      width: 160px;
+      width: min(80vw, 280px);
       background: #000;
       border: 1.5px solid #ff6b00;
       color: #fff;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-      padding: 6px 8px;
+      font-size: clamp(0.9rem, 4vw, 1rem);
+      padding: 10px 8px;
       outline: none;
       caret-color: #ff6b00;
       letter-spacing: 0.05em;
       text-align: center;
+      -webkit-appearance: none;
     }
     #secret-input::placeholder { color: #555; }
     #secret-input:focus { box-shadow: 0 0 8px rgba(255,107,0,0.4); }
 
     #submit-btn {
-      width: 160px;
+      width: min(80vw, 280px);
       background: #ff6b00;
       border: none;
       color: #000;
       font-family: 'JetBrains Mono', monospace;
       font-weight: 700;
-      font-size: 0.8rem;
+      font-size: clamp(0.8rem, 3.5vw, 0.9rem);
       letter-spacing: 0.08em;
-      padding: 10px 0;
+      padding: 14px 0;
       cursor: pointer;
       text-transform: uppercase;
       transition: background 0.2s, box-shadow 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
-    #submit-btn:hover { background: #ff8c33; box-shadow: 0 0 12px rgba(255,107,0,0.5); }
+    #submit-btn:hover, #submit-btn:active { background: #ff8c33; box-shadow: 0 0 12px rgba(255,107,0,0.5); }
 
     #error-msg {
-      margin-top: 6px;
+      margin-top: 8px;
       color: #ff3333;
-      font-size: 0.7rem;
+      font-size: clamp(0.65rem, 3vw, 0.75rem);
       letter-spacing: 0.05em;
       min-height: 1em;
       font-family: 'JetBrains Mono', monospace;
     }
 
+    /* ── Reveal screen ── */
     #reveal-screen {
       position: fixed;
       inset: 0;
@@ -134,25 +144,27 @@
       display: none;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 32px 24px;
+      justify-content: flex-start;
+      padding: 40px 20px 40px;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     #reveal-screen.active { display: flex; }
 
     #reveal-title {
       font-family: 'Orbitron', sans-serif;
       font-weight: 900;
-      font-size: clamp(1.6rem, 5vw, 3rem);
+      font-size: clamp(1.3rem, 6vw, 3rem);
       color: #ff6b00;
-      letter-spacing: 0.15em;
+      letter-spacing: clamp(0.05em, 2vw, 0.15em);
       text-transform: uppercase;
       margin-bottom: 8px;
       text-shadow: 0 0 20px rgba(255,107,0,0.6);
+      text-align: center;
     }
 
     #reveal-subtitle {
-      font-size: 0.7rem;
+      font-size: clamp(0.6rem, 2.5vw, 0.7rem);
       color: #00cc66;
       letter-spacing: 0.2em;
       margin-bottom: 16px;
@@ -160,27 +172,31 @@
     }
 
     #reveal-desc {
-      font-size: 0.78rem;
+      font-size: clamp(0.72rem, 3vw, 0.78rem);
       color: #aaa;
-      letter-spacing: 0.06em;
-      margin-bottom: 32px;
+      letter-spacing: 0.05em;
+      margin-bottom: 28px;
       text-align: center;
       max-width: 520px;
-      line-height: 1.6;
+      line-height: 1.7;
+      padding: 0 8px;
     }
 
     #cards-row {
       display: flex;
-      gap: 16px;
-      margin-bottom: 32px;
+      gap: 12px;
+      margin-bottom: 28px;
       flex-wrap: wrap;
       justify-content: center;
+      width: 100%;
     }
 
     .info-card {
       border: 1px solid #ff6b00;
-      padding: 20px 24px;
-      min-width: 140px;
+      padding: 16px 20px;
+      min-width: 100px;
+      flex: 1 1 90px;
+      max-width: 180px;
       text-align: center;
       position: relative;
       background: #000;
@@ -194,7 +210,7 @@
     }
 
     .card-label {
-      font-size: 0.6rem;
+      font-size: clamp(0.55rem, 2.5vw, 0.6rem);
       color: #ff6b00;
       letter-spacing: 0.2em;
       text-transform: uppercase;
@@ -202,7 +218,7 @@
     }
 
     .card-value {
-      font-size: 1.1rem;
+      font-size: clamp(0.9rem, 4vw, 1.1rem);
       font-weight: 700;
       color: #fff;
       letter-spacing: 0.05em;
@@ -210,7 +226,7 @@
 
     .card-value small {
       display: block;
-      font-size: 0.65rem;
+      font-size: clamp(0.6rem, 2.5vw, 0.65rem);
       color: #aaa;
       margin-top: 4px;
       font-weight: 400;
@@ -221,19 +237,19 @@
       flex-direction: column;
       align-items: center;
       gap: 0;
+      width: 100%;
     }
 
     #form-wrapper {
-      border: 1.5px solid #ff6b00;
+      border: none;
       background: #000;
       overflow: hidden;
-      width: 420px;
-      max-width: 95vw;
+      width: min(420px, 95vw);
     }
 
     #form-wrapper iframe {
       width: 100%;
-      height: 300px;
+      height: 380px;
       border: none;
       display: block;
       filter: invert(1) hue-rotate(180deg) brightness(0.85);
@@ -241,13 +257,14 @@
 
     #confirm-note {
       margin-top: 14px;
-      font-size: 0.62rem;
+      font-size: clamp(0.58rem, 2.5vw, 0.62rem);
       color: #555;
       letter-spacing: 0.1em;
       text-align: center;
     }
     #confirm-note span { color: #ff6b00; }
 
+    /* scanline overlay */
     #reveal-screen::after {
       content: '';
       position: fixed;
@@ -263,11 +280,26 @@
       z-index: 0;
     }
     #reveal-screen > * { position: relative; z-index: 1; }
+
+    /* ── Touch ripple indicator ── */
+    #touch-indicator {
+      position: fixed;
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,107,0,0.4);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 9998;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    #touch-indicator.active { opacity: 1; }
   </style>
 </head>
 <body>
 
 <div id="cursor"></div>
+<div id="touch-indicator"></div>
 <canvas id="lantern-canvas"></canvas>
 <div id="letters-layer"></div>
 
@@ -275,7 +307,7 @@
 
 <div id="center-ui">
   <div id="input-box">
-    <input id="secret-input" type="text" placeholder="palavra-chave" autocomplete="off" spellcheck="false" />
+    <input id="secret-input" type="text" placeholder="palavra-chave" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off" />
     <button id="submit-btn">Entrar</button>
     <div id="error-msg"></div>
   </div>
@@ -288,12 +320,12 @@
 
   <div id="cards-row">
     <div class="info-card">
-      <div class="card-label">Local</div>
+      <div class="card-label">Lugar</div>
       <div class="card-value">A descobrir<small>&nbsp;</small></div>
     </div>
     <div class="info-card">
       <div class="card-label">Hora</div>
-      <div class="card-value">13h<small>&nbsp;</small></div>
+      <div class="card-value">15h<small>&nbsp;</small></div>
     </div>
     <div class="info-card">
       <div class="card-label">Dia</div>
@@ -303,7 +335,9 @@
 
   <div id="confirm-block">
     <div id="form-wrapper">
-<iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeJcW9xKLrDTFpFTMjLzAj6N5CwYZG5EHtdrX5Wvpvne9zh7w/viewform?embedded=true" width="640" height="364" frameborder="0" marginheight="0" marginwidth="0">A carregar…</iframe>    <div id="confirm-note">Confirmação até <span>19 de junho</span></div>
+      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeJcW9xKLrDTFpFTMjLzAj6N5CwYZG5EHtdrX5Wvpvne9zh7w/viewform?embedded=true" loading="lazy">A carregar…</iframe>
+    </div>
+    <div id="confirm-note">Confirmação até <span>19 de junho</span></div>
   </div>
 </div>
 
@@ -311,14 +345,34 @@
 (function () {
   'use strict';
 
-  const cursor = document.getElementById('cursor');
-  let mx = window.innerWidth / 2, my = window.innerHeight / 2;
-  document.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    cursor.style.left = mx + 'px';
-    cursor.style.top  = my + 'px';
-  });
+  /* ── Input / cursor / top-hint positioning ── */
+  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  const cursor   = document.getElementById('cursor');
+  const touchInd = document.getElementById('touch-indicator');
+  const topHint  = document.getElementById('top-hint');
 
+  let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+
+  /* Position top-hint just above the input area */
+  function positionHint() {
+    const cy = window.innerHeight / 2;
+    topHint.style.top = (cy - 80) + 'px';
+  }
+  positionHint();
+
+  if (!isTouch) {
+    cursor.style.display = 'block';
+    document.body.style.cursor = 'none';
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.left = mx + 'px';
+      cursor.style.top  = my + 'px';
+    });
+  } else {
+    document.body.style.cursor = 'default';
+  }
+
+  /* ── Lantern canvas ── */
   const canvas = document.getElementById('lantern-canvas');
   const ctx    = canvas.getContext('2d');
   const RADIUS = 130;
@@ -349,30 +403,74 @@
     ctx.restore();
   }
 
+  /* ── Touch lantern ── */
+  let touchActive = false;
+  let touchTimeout = null;
+
+  if (isTouch) {
+    canvas.style.pointerEvents = 'none';
+
+    document.addEventListener('touchstart', e => {
+      const t = e.touches[0];
+      mx = t.clientX; my = t.clientY;
+      touchInd.style.left = mx + 'px';
+      touchInd.style.top  = my + 'px';
+      touchInd.classList.add('active');
+      touchActive = true;
+      clearTimeout(touchTimeout);
+    }, { passive: true });
+
+    document.addEventListener('touchmove', e => {
+      const t = e.touches[0];
+      mx = t.clientX; my = t.clientY;
+      touchInd.style.left = mx + 'px';
+      touchInd.style.top  = my + 'px';
+    }, { passive: true });
+
+    document.addEventListener('touchend', () => {
+      touchTimeout = setTimeout(() => {
+        touchInd.classList.remove('active');
+        touchActive = false;
+        /* fade lantern back to center */
+        mx = window.innerWidth / 2;
+        my = window.innerHeight / 2;
+      }, 1500);
+    }, { passive: true });
+  }
+
+  /* ── Letters ── */
   const layer   = document.getElementById('letters-layer');
   const TARGET  = 'DESCOBERTA';
   const DECOYS  = 'ABCDFGHIJKLMNOPQRSTUVXZWYÇ1234567890!?@#';
-  const TOTAL   = 160;
   const letters = [];
 
   function randBetween(a, b) { return a + Math.random() * (b - a); }
 
   function spawnLetters() {
-    const pad = 50;
-    const cx  = window.innerWidth  / 2;
-    const cy  = window.innerHeight / 2;
+    const vw  = window.innerWidth;
+    const vh  = window.innerHeight;
+    const pad = vw < 480 ? 20 : 40;
+    const cx  = vw / 2;
+    const cy  = vh / 2;
 
-    const cols = 16;
-    const rows = 10;
-    const cellW = (window.innerWidth  - pad * 2) / cols;
-    const cellH = (window.innerHeight - pad * 2) / rows;
+    /* Adaptive grid: fewer columns on narrow screens */
+    const cols = vw < 480 ? 8 : (vw < 768 ? 10 : 16);
+    const rows = vw < 480 ? 12 : 10;
+    const TOTAL = vw < 480 ? 80 : (vw < 768 ? 110 : 160);
+
+    const cellW = (vw - pad * 2) / cols;
+    const cellH = (vh - pad * 2) / rows;
+
+    /* Input element actual width for protection zone */
+    const inputEl = document.getElementById('secret-input');
+    const inputW  = inputEl ? inputEl.offsetWidth + 40 : 200;
 
     const phraseTop    = cy - 115;
     const phraseBottom = cy - 45;
     const inputTop     = cy - 45;
-    const inputBottom  = cy + 110;
-    const inputLeft    = cx - 130;
-    const inputRight   = cx + 130;
+    const inputBottom  = cy + 120;
+    const inputLeft    = cx - inputW / 2;
+    const inputRight   = cx + inputW / 2;
 
     const cells = [];
     for (let r = 0; r < rows; r++) {
@@ -381,9 +479,7 @@
         const cy2 = pad + r * cellH + cellH / 2;
         const inPhrase = cy2 > phraseTop  && cy2 < phraseBottom;
         const inInput  = cx2 > inputLeft  && cx2 < inputRight && cy2 >= inputTop && cy2 < inputBottom;
-        if (!inPhrase && !inInput) {
-          cells.push({ cx: cx2, cy: cy2 });
-        }
+        if (!inPhrase && !inInput) cells.push({ cx: cx2, cy: cy2 });
       }
     }
 
@@ -391,6 +487,9 @@
       const j = Math.floor(Math.random() * (i + 1));
       [cells[i], cells[j]] = [cells[j], cells[i]];
     }
+
+    const minFontRem = vw < 480 ? 1.0 : 1.4;
+    const maxFontRem = vw < 480 ? 2.0 : 3.2;
 
     const count = Math.min(TOTAL, cells.length);
     for (let i = 0; i < count; i++) {
@@ -406,9 +505,9 @@
       const el = document.createElement('span');
       el.classList.add('letter', isTarget ? 'target' : 'decoy');
       el.textContent = char;
-      el.style.left     = x + 'px';
-      el.style.top      = y + 'px';
-      el.style.fontSize = randBetween(1.4, 3.2) + 'rem';
+      el.style.left      = x + 'px';
+      el.style.top       = y + 'px';
+      el.style.fontSize  = randBetween(minFontRem, maxFontRem) + 'rem';
       el.style.transform = `rotate(${randBetween(-40, 40)}deg)`;
       layer.appendChild(el);
       letters.push({ el, x, y });
@@ -424,6 +523,7 @@
     });
   }
 
+  /* ── Main loop ── */
   function loop() {
     drawLantern();
     updateLetterVisibility();
@@ -431,6 +531,7 @@
   }
   loop();
 
+  /* ── Input logic ── */
   const input  = document.getElementById('secret-input');
   const btn    = document.getElementById('submit-btn');
   const errMsg = document.getElementById('error-msg');
@@ -441,8 +542,10 @@
     if (val === 'descoberta') {
       errMsg.textContent = '';
       reveal.classList.add('active');
-      document.body.style.cursor = 'default';
-      cursor.style.display = 'none';
+      if (!isTouch) {
+        document.body.style.cursor = 'default';
+        cursor.style.display = 'none';
+      }
     } else {
       errMsg.textContent = '// acesso negado';
       input.value = '';
@@ -453,10 +556,16 @@
   btn.addEventListener('click', attempt);
   input.addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
 
+  /* ── Resize: respawn letters ── */
+  let resizeTimer;
   window.addEventListener('resize', () => {
-    letters.forEach(({ el }) => el.remove());
-    letters.length = 0;
-    spawnLetters();
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      positionHint();
+      letters.forEach(({ el }) => el.remove());
+      letters.length = 0;
+      spawnLetters();
+    }, 200);
   });
 })();
 </script>
